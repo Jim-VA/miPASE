@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+		<link rel="stylesheet" href="/static/css/style.css" />
+	</head>
+	<body>
+		<div class="topbar"></div>
+
+		<div class="page">
+			<div class="main">
+				<img src="/static/img/netface.svg" alt="profile" width=400 px, height= 400px />
+			</div>
+
+			<div class="main">
+				<h1>Mi<span>PASE</span></h1>
+				<p>Your Personal Academic Engine</p>
+
+				<div class="searchrow">
+					<input
+						type="text"
+						id="query"
+						placeholder="Search in your courses..."
+					/>
+					<button onclick="search()">Search</button>
+				</div>
+
+				<div class="circlebtns">
+					<div class="cbtn demo">Demo</div>
+					<div class="cbtn help">?</div>
+				</div>
+
+				<div id="results"></div>
+			</div>
+		</div>
+
+		<div class="bottombar"></div>
+		<script>
+			async function search() {
+				const query = document.getElementById("query").value;
+				if (!query) return;
+
+				document.getElementById("results").innerHTML =
+					'<p style = "color:#336699">Searching...</p>';
+
+				const res = await fetch(
+					`/search?q=${encodeURIComponent(query)}`,
+				);
+				const results = await res.json();
+
+				const div = document.getElementById("results");
+
+				if (results.length === 0) {
+					div.innerHTML = "<p>No results found. </p>";
+					return;
+				}
+
+				div.innerHTML = results.map
+					(r => `
+                    <div class = "result-card">
+                        <h3><a href = "${r.source}" tarhet = "_blank">${r.title}</a></h3>
+                        <small class = "source">${r.source}</small>
+                        <p>${r.snippet}...</p>
+                        <small class = "score">Relevance: ${r.score}</small>
+                    </div>
+                `).join('');
+			}
+
+            document.getElementById('query').addEventListener('keypress', function(e){
+                if (e.key === 'Enter') search()
+            });
+		</script>
+	</body>
+</html>
