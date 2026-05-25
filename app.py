@@ -71,7 +71,7 @@ def search():
     
     # Case 3: All scores are zero
     max_score = max(scores) if scores.any() else 0
-    if max_score == 0:
+    if max_score == 0 and len(query) > 6:
         return jsonify({
             "warning": f" No exact matches for '{query}'.",
             "suggestions": ["algorithms", "machine learning","calculus"],

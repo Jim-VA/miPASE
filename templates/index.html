@@ -33,11 +33,6 @@
 					<button onclick="search()">Search</button>
 				</div>
 
-				<div class="circlebtns">
-					<div class="cbtn demo">Demo</div>
-					<div class="cbtn help">?</div>
-				</div>
-
 				<div id="results"></div>
 			</div>
 		</div>
@@ -73,8 +68,9 @@
                                         gap:8px;
                                         justify-content:center;
                                         flex-wrap: wrap;>`;
-						data.suggestions.forEach((s) => {
+						data.suggestions.forEach(s => {
 							html += `<span onclick="searchFor('${s}')"
+                                        class ="chip"
                                         style="background:#f0fafa;
                                                 border:1px solid #088F8F;
                                                 padding:6px 16px;
