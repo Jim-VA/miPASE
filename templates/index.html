@@ -11,7 +11,13 @@
 
 		<div class="page">
 			<div class="main">
-				<img src="/static/img/netface.svg" alt="profile" width=400 px, height= 400px />
+				<img
+					src="/static/img/netface.svg"
+					alt="profile"
+					width="400"
+					px,
+					height="400px"
+				/>
 			</div>
 
 			<div class="main">
@@ -43,34 +49,100 @@
 				if (!query) return;
 
 				document.getElementById("results").innerHTML =
-					'<p style = "color:#336699">Searching...</p>';
+					'<p style = "color:#336699; text-align:center">Searching...</p>';
 
 				const res = await fetch(
 					`/search?q=${encodeURIComponent(query)}`,
 				);
-				const results = await res.json();
+				const data = await res.json();
 
 				const div = document.getElementById("results");
 
-				if (results.length === 0) {
-					div.innerHTML = "<p>No results found. </p>";
+				// Handle warning notifs
+				if (data.warning) {
+					let html = `
+                    <div style="text-align:center, padding: 20px;">
+                        <p style=" color: #cc0000; font-size: 16 px;>
+                            ${data.warning}
+                        </p>`;
+
+					if (data.suggestions) {
+						html += `<p style = "color: #336699;">
+                                Did you mean?</p>
+                            <div style="display:flex;
+                                        gap:8px;
+                                        justify-content:center;
+                                        flex-wrap: wrap;>`;
+						data_suggestions.forEach((s) => {
+							html += `<span onclick="searchFor('${s}')"
+                                        style="background:#f0fafa;
+                                                border:1px solid #088F8F;
+                                                padding:6px 16px;
+                                                border-radius:20px;
+                                                cursor:pointer;
+                                                color: #088F8F;">
+                                </span>`;
+						});
+						html += `</div>`;
+					}
+
+					// Display results if available
+					if (data.results && data.results.length > 0) {
+						html += `<p style="color:#999;margin-top:16px;">
+                                Showing possibly related courses:</p>`;
+						html += data.results
+							.map(
+								(r) => `
+                        <div class="results-card">
+                            <h3>
+                                <a href="${r.source}" target="_blank">
+                                    ${r.title}
+                                </a>
+                            </h3>
+                            <small class="source">${r.source}</small>
+                            <p>${r.snippet}...</p>
+                        </div>`,
+							)
+							.join("");
+					}
+
+					html += `</div>`;
+					div.innerHTML = html;
 					return;
 				}
 
-				div.innerHTML = results.map
-					(r => `
+				// Normal results
+				if (data.length === 0) {
+					div.innerHTML = `
+                        <p style="text-align:center; color:#999;">
+                            No results found. Try different keywords!
+                        </p>`;
+					return;
+				}
+
+				div.innerHTML = data
+					.map(
+						(r) => `
                     <div class = "result-card">
-                        <h3><a href = "${r.source}" tarhet = "_blank">${r.title}</a></h3>
+                        <h3>
+                            <a href = "${r.source}" target = "_blank">
+                                ${r.title}
+                            </a>
+                        </h3>
                         <small class = "source">${r.source}</small>
                         <p>${r.snippet}...</p>
-                        <small class = "score">Relevance: ${r.score}</small>
+                        <small style="color:#088F8F">🎓 MIT OpenCourseWare</small>
                     </div>
-                `).join('');
+                `,
+					)
+					.join("");
 			}
 
-            document.getElementById('query').addEventListener('keypress', function(e){
-                if (e.key === 'Enter') search()
-            });
+			//Allows clicking suggestions chips to search
+			function searchFor(term) {
+				document.getElementById("query").value = term;
+				search();
+			}
 		</script>
 	</body>
 </html>

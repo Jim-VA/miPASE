@@ -38,6 +38,24 @@ def home():
 def search():
     # Search API endpoint
     query = request.args.get("q","") # Grab query from URL
+    
+    # FOOLPROOOFING
+    # Case 1: Empty query
+    if not query or len(query.strip()) <2:
+        return jsonify({
+            "warning": "Please enter a search term!",
+            "suggestions": ["algorithms", "machine learning", "calculus"]
+        })
+    
+    # Case 2: Gibberish (no vowels or random chars)
+    vowels = set ('aiueoAIUEO')
+    if len(query) > 3 and not any (c in vowels for c in query):
+        return jsonify({
+            "warning":"Hmm, that doesn't look like a valid search.",
+            "suggestions":["AI","linear algebra","algorithms"]
+        })
+    
+    # BM25 Search
     tokens = query.lower().split() # Tokenize query
     scores = bm25.get_scores(tokens) # Calculate BM25 relevance
     top = sorted(range(len(scores)), # Get top 5 docs
@@ -45,12 +63,22 @@ def search():
                 reverse = True)[:5]
     
     # List of dictionary results to send back to frontend
-    results = [{"title":data[i]["title"],
+    candidates = [{"title":data[i]["title"],
                 "source":data[i]["source"],
                 "snippet": data[i]["content"][:300],
-                "score": round(scores[i], 4)} for i in top]
+                "score": round(scores[i], 4)
+                } for i in top]
     
-    return jsonify(results) # Convert Python listo to native JSON format
+    # Case 3: All scores are zero
+    max_score = max(scores) if scores.any() else 0
+    if max_score == 0:
+        return jsonify({
+            "warning": f" No exact matches for '{query}'.",
+            "suggestions": ["algorithms", "machine learning","calculus"],
+            "results": candidates[:3]
+        })
+    
+    return jsonify(candidates) # Convert Python listo to native JSON format
 
 
 if __name__ == "__main__":
