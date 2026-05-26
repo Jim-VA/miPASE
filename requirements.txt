@@ -3,3 +3,5 @@ httpx
 beautifulsoup4
 rank_bm25
 pymupdf
+groq
+python-dotenv

@@ -39,9 +39,20 @@
 
 		<div class="bottombar"></div>
 		<script>
+			let lastSuggestions = [
+				"algorithms",
+				"machine learning",
+				"calculus",
+			];
+            let cameFromChip = false;
+
 			async function search() {
 				const query = document.getElementById("query").value;
-				if (!query) return;
+				// Show initial chips if query is cleared
+				if (!query) {
+					showLastChips();
+					return;
+				}
 
 				document.getElementById("results").innerHTML =
 					'<p style = "color:#336699; text-align:center">Searching...</p>';
@@ -56,18 +67,18 @@
 				// Handle warning notifs
 				if (data.warning) {
 					let html = `
-                    <div style="text-align:center, padding: 20px;">
-                        <p style=" color: #cc0000; font-size: 16 px;>
+                    <div style="text-align:center; padding: 20px;">
+                        <p style="color: #cc0000; font-size: 16px;">
                             ${data.warning}
                         </p>`;
 
-					if (data.suggestions) {
-						html += `<p style = "color: #336699;">
-                                Did you mean?</p>
+					if (data.suggestions && data.suggestions.length > 0) {
+						lastSuggestions = data.suggestions;
+						html += `<p style = "color: #336699;">Try searching for:</p>
                             <div style="display:flex;
                                         gap:8px;
                                         justify-content:center;
-                                        flex-wrap: wrap;>`;
+                                        flex-wrap: wrap;">`;
 						data.suggestions.forEach((s) => {
 							html += `<span onclick="searchFor('${s}')"
                                         style="background:#f0fafa;
@@ -82,24 +93,31 @@
 					}
 
 					// Display results if available
-					if (data.results && data.results.length > 0) {
-						html += `<p style="color:#999;margin-top:16px;">
-                                Showing possibly related courses:</p>`;
-						html += data.results
-							.map(
-								(r) => `
-                        <div class="results-card">
-                            <h3>
-                                <a href="${r.source}" target="_blank">
-                                    ${r.title}
-                                </a>
-                            </h3>
-                            <small class="source">${r.source}</small>
-                            <p>${r.snippet}...</p>
-                        </div>`,
-							)
-							.join("");
-					}
+                    if (data.results && data.results.length > 0) {
+                        html += `<div style="margin-bottom:16px;">
+                                    <span onclick="showLastChips()"
+                                                    style="color:#088F8F; 
+                                                            cursor:pointer; 
+                                                            font-size:13px;">
+                                                    ← Back to suggestions
+                                    </span>
+                                </div>`;
+
+                        html += `<p style="color:#999;margin-top:16px;">
+                                    Showing possibly related courses:</p>`;
+    
+                        html += data.results.map(r => `
+                            <div class="result-card">
+                                <h3>
+                                    <a href="${r.source}" target="_blank">
+                                        ${r.title}
+                                    </a>
+                                </h3>
+                                <small class="source">${r.source}</small>
+                                <p>${r.snippet}...</p>
+                            </div>`
+                        ).join("");
+                    }
 
 					html += `</div>`;
 					div.innerHTML = html;
@@ -115,26 +133,60 @@
 					return;
 				}
 
-				div.innerHTML = data
-					.map(
-						(r) => `
-                    <div class = "result-card">
-                        <h3>
-                            <a href = "${r.source}" target = "_blank">
-                                ${r.title}
-                            </a>
-                        </h3>
-                        <small class = "source">${r.source}</small>
+                let html = '';
+                // Only show if chip was shown
+                if (cameFromChip){
+                    html += `<div style="margin-bottom:16px;">
+                                    <span onclick="showLastChips()"
+                                                    style="color:#088F8F; 
+                                                            cursor:pointer; 
+                                                            font-size:13px;">
+                                                    ← Back to suggestions
+                                    </span>
+                            </div>`;
+                }
+
+
+				html += data.map(r => `
+                    <div class="result-card">
+                        <h3><a href="${r.source}" target="_blank">${r.title}</a></h3>
+                        <small class="source">${r.source}</small>
                         <p>${r.snippet}...</p>
+                        ${r.reason ? `<div class="reason">💡 ${r.reason}</div>` : ""}
                         <small style="color:#088F8F">🎓 MIT OpenCourseWare</small>
                     </div>
-                `,
-					)
-					.join("");
+                `).join("");
+
+                div.innerHTML = html;
+            }
+
+			// // Show chips again
+			function showLastChips() {
+				document.getElementById("results").innerHTML = `
+                    <p style="color:#336699; text-align:center">
+                        Did you mean?</p>
+                    <div style="display:flex; gap:8px; 
+                                justify-content:center; 
+                                flex-wrap:wrap;">
+                        ${lastSuggestions
+							.map(
+								(s) => `
+                            <span onclick="searchFor('${s}')"
+                                    style="background:#f0fafa;
+                                            border:1px solid #088F8F;
+                                            padding:6px 16px;
+                                            border-radius:20px;
+                                            cursor:pointer;
+                                            color:#088F8F;">${s}</span>
+                        `,
+							)
+							.join("")}
+                    </div>`;
 			}
 
 			//Allows clicking suggestions chips to search
 			function searchFor(term) {
+                cameFromChip = true;
 				document.getElementById("query").value = term;
 				search();
 			}
