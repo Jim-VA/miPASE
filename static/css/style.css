@@ -100,24 +100,6 @@ h1 span { color: #cc0000; }
     margin-top: 8px;
 }
 
-.cbtn {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: bold;
-    cursor: pointer;
-    border: 2px solid #088F8F;
-    transition: all 0.2s;
-}
-
-.cbtn:hover { transform: scale(1.05); }
-.cbtn.demo { background: #088F8F; color: white; }
-.cbtn.help { background: white; color: #088F8F; font-size: 22px; }
-
 .result-card {
     width: 100%;
     max-width: 600px;
@@ -157,4 +139,22 @@ h1 span { color: #cc0000; }
 .result-card .score {
     color: #999;
     font-size: 11px;
+}
+
+@media (max-width: 768px) {
+    .page {
+        flex-direction: column;
+    }
+    .sidebar {
+        display: none;
+    }
+    .main {
+        padding: 20px;
+    }
+    .searchrow {
+        flex-direction: column;
+    }
+    .searchrow input {
+        width: 100%;
+    }
 }
