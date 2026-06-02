@@ -5,6 +5,7 @@ MiPASE is a simple search engine to look for free high-quality academic courses 
 
 ## Project Structure
 
+```
 jarvis/
 ├── data/
 │   ├── index.json            # Scraped course data
@@ -25,3 +26,4 @@ jarvis/
 ├── requirements.txt
 ├── Procfile                  # Render deployment
 └── .env.example              # Environment variables template
+```
