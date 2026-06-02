@@ -133,6 +133,7 @@ def search():
 
         # Match back to full candidate data
         results = []
+        seen_titles = set() 
         for item in reranked:
             matched = None
             for c in candidates:
@@ -140,7 +141,8 @@ def search():
                     c["title"].lower() in item["title"].lower()):
                     matched = c
                     break
-            if matched:
+            if matched and matched["title"] not in seen_titles:
+                seen_titles.add(matched["title"])  
                 results.append({
                         "title": matched["title"],
                         "source": matched["source"],
